@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: Currency Exchange API
+  description: API для конвертации между крипто и фиатными валютами.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+paths:
+  /convert:
+    get:
+      summary: Конвертация валюты
+      description: Конвертирует сумму из одной валюты в другую по актуальному курсу.
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+          required: true
+          description: Код исходной валюты
+        - in: query
+          name: to
+          schema:
+            type: string
+          required: true
+          description: Код целевой валюты
+        - in: query
+          name: amount
+          schema:
+            type: number
+            format: float
+          required: true
+          description: Сумма для конвертации
+      responses:
+        '200':
+          description: Успешная конвертация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConvertResponse'
+        '400':
+          description: Ошибка валидации запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+components:
+  schemas:
+    ConvertRequest:
+      type: object
+      required:
+        - from
+        - to
+        - amount
+      properties:
+        from:
+          type: string
+          example: BTC
+          description: Код исходной валюты
+        to:
+          type: string
+          example: USD
+          description: Код целевой валюты
+        amount:
+          type: number
+          format: float
+          example: 0.5
+          description: Сумма для конвертации
+
+    ConvertResponse:
+      type: object
+      properties:
+        from:
+          type: string
+          example: BTC
+        to:
+          type: string
+          example: USD
+        originalAmount:
+          type: number
+          format: float
+          example: 0.5
+        convertedAmount:
+          type: number
+          format: float
+          example: 16000.0
+        rate:
+          type: number
+          format: float
+          example: 32000.0
+
+    FieldError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: amount
+        message:
+          type: string
+          example: Должно быть числом больше 0
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
